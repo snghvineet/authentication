@@ -1,5 +1,7 @@
 import express, { Request, Response, Application, NextFunction } from 'express';
+import { Client } from 'pg';
 import 'dotenv/config';
+
 import authMiddleware from './middleware/auth-middleware';
 import errorHandler from './middleware/error-handler';
 import { authRouter } from './routers';
@@ -19,7 +21,14 @@ app.get('/', (req: Request, res: Response, next: NextFunction) => {
 
 app.use(errorHandler);
 
-const port = process.env.PORT ?? 3000;
-app.listen(port, () => {
-	console.log(`Server started on port: ${port}.`);
-});
+async function main() {
+	const client = new Client({ application_name: 'authentication' });
+	await client.connect();
+
+	const port = process.env.PORT;
+	app.listen(port, () => {
+		console.log(`Server started on port: ${port}.`);
+	});
+}
+
+main().catch((err) => console.log(err));
